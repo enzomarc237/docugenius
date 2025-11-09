@@ -1,0 +1,2 @@
+# docugenius
+Documentation AI assistant.
