@@ -11,14 +11,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:docugenius/main.dart';
 
 void main() {
-  testWidgets('DocuGenius UI smoke test', (WidgetTester tester) async {
+  testWidgets('DocuGenius Main Dashboard UI smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify that the AppBar title is correct.
-    expect(find.text('DocuGenius'), findsOneWidget);
+    // Verify that the TopToolbar is present.
+    expect(find.byType(TopToolbar), findsOneWidget);
 
-    // Verify that the search bar is present.
-    expect(find.byType(TextField), findsOneWidget);
+    // Verify that the LeftSidebar is present.
+    expect(find.byType(LeftSidebar), findsOneWidget);
+
+    // Verify that the RightSidebar is present.
+    expect(find.byType(RightSidebar), findsOneWidget);
+
+    // Verify that the main content area contains the "Welcome back" text.
+    expect(find.text('Welcome back'), findsOneWidget);
+
+    // Verify that there are three InfoCard widgets.
+    expect(find.byType(InfoCard), findsNWidgets(3));
   });
 }
