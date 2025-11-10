@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:macos_ui/macos_ui.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,52 +11,87 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MacosApp(
       title: 'DocuGenius',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF050814),
-        primaryColor: const Color(0xFF3B82F6),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF3B82F6),
-          secondary: Color(0xFF8B5CF6),
-          surface: Color(0xFF0B1020),
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.white),
-        ),
-      ),
+      theme: MacosThemeData.dark(),
       home: const MainDashboard(),
     );
   }
 }
 
-class MainDashboard extends StatelessWidget {
+class MainDashboard extends StatefulWidget {
   const MainDashboard({super.key});
 
   @override
+  State<MainDashboard> createState() => _MainDashboardState();
+}
+
+class _MainDashboardState extends State<MainDashboard> {
+  int _currentIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const TopToolbar(),
-          Expanded(
-            child: Row(
-              children: [
-                const LeftSidebar(),
-                const VerticalDivider(width: 1, color: Color(0xFF1F2937)),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(24.0),
-                    child: const MainContent(),
-                  ),
+    return MacosWindow(
+      sidebar: Sidebar(
+        minWidth: 240,
+        builder: (context, scrollController) {
+          return SidebarItems(
+            currentIndex: _currentIndex,
+            onChanged: (index) => setState(() => _currentIndex = index),
+            items: const [
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.home),
+                label: Text('Overview'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.search),
+                label: Text('Search'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.doc),
+                label: Text('Docs'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.folder),
+                label: Text('Projects'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.group),
+                label: Text('Team'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.book),
+                label: Text('Learning'),
+              ),
+              SidebarItem(
+                leading: MacosIcon(CupertinoIcons.settings),
+                label: Text('Settings'),
+              ),
+            ],
+          );
+        },
+      ),
+      child: ContentArea(
+        builder: (context, scrollController) {
+          return Column(
+            children: [
+              const TopToolbar(),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(24.0),
+                        child: const MainContent(),
+                      ),
+                    ),
+                    const RightSidebar(),
+                  ],
                 ),
-                const VerticalDivider(width: 1, color: Color(0xFF1F2937)),
-                const RightSidebar(),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -69,10 +105,10 @@ class TopToolbar extends StatelessWidget {
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0B1020),
+      decoration: BoxDecoration(
+        color: MacosTheme.of(context).canvasColor,
         border: Border(
-          bottom: BorderSide(color: Color(0xFF1F2937)),
+          bottom: BorderSide(color: MacosTheme.of(context).dividerColor),
         ),
       ),
       child: Row(
@@ -89,67 +125,23 @@ class TopToolbar extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 48),
-          const Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Ask across your docs, APIs, and codebase…',
-                border: InputBorder.none,
-              ),
-            ),
+          const Spacer(),
+          const MacosSearchField(
+            placeholder: 'Ask across your docs, APIs, and codebase…',
           ),
-          const SizedBox(width: 48),
-          const Icon(Icons.person_outline),
-          const SizedBox(width: 24),
-          const Icon(Icons.space_dashboard_outlined),
-          const SizedBox(width: 24),
-          const Icon(Icons.settings_outlined),
-        ],
-      ),
-    );
-  }
-}
-
-class LeftSidebar extends StatelessWidget {
-  const LeftSidebar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 240,
-      padding: const EdgeInsets.all(24.0),
-      color: const Color(0xFF0B1020),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          SidebarItem(icon: Icons.dashboard_outlined, text: 'Overview'),
-          SidebarItem(icon: Icons.search, text: 'Search'),
-          SidebarItem(icon: Icons.description_outlined, text: 'Docs'),
-          SidebarItem(icon: Icons.folder_outlined, text: 'Projects'),
-          SidebarItem(icon: Icons.people_outline, text: 'Team'),
-          SidebarItem(icon: Icons.school_outlined, text: 'Learning'),
-          SidebarItem(icon: Icons.settings_outlined, text: 'Settings'),
-        ],
-      ),
-    );
-  }
-}
-
-class SidebarItem extends StatelessWidget {
-  const SidebarItem({super.key, required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Row(
-        children: [
-          Icon(icon),
-          const SizedBox(width: 12),
-          Text(text),
+          const Spacer(),
+          MacosIconButton(
+            icon: const MacosIcon(CupertinoIcons.person),
+            onPressed: () {},
+          ),
+          MacosIconButton(
+            icon: const MacosIcon(CupertinoIcons.square_grid_2x2),
+            onPressed: () {},
+          ),
+          MacosIconButton(
+            icon: const MacosIcon(CupertinoIcons.settings),
+            onPressed: () {},
+          ),
         ],
       ),
     );
@@ -164,6 +156,7 @@ class MainContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 24),
         const Text(
           'Welcome back',
           style: TextStyle(
@@ -197,7 +190,7 @@ class InfoCard extends StatelessWidget {
       child: Container(
         height: 150,
         decoration: BoxDecoration(
-          color: const Color(0xFF0B1020),
+          color: MacosTheme.of(context).canvasColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
@@ -216,7 +209,7 @@ class RightSidebar extends StatelessWidget {
     return Container(
       width: 320,
       padding: const EdgeInsets.all(24.0),
-      color: const Color(0xFF0B1020),
+      color: MacosTheme.of(context).canvasColor,
       child: const Center(
         child: Text('AI Assistant thread'),
       ),
